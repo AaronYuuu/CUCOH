@@ -1,0 +1,51 @@
+{
+  "session_type": "automated_demo",
+  "location": {
+    "institution": "Queen's University Faculty of Health Sciences",
+    "address": "18 Stuart Street, Kingston, ON K7L 3N6",
+    "postal_code": "K7L 3N6"
+  },
+  "timestamp": "2026-01-17T10:57:06.453909",
+  "patient": {
+    "id": "P_DEMO_001",
+    "age": 22,
+    "sex": "Female",
+    "chief_complaint": "Sore throat and fever for 3 days"
+  },
+  "ai_assessment": {
+    "urgency": "URGENT",
+    "confidence": 0.8,
+    "differentials": [
+      "Group A Streptococcal pharyngitis (bacterial)",
+      "Viral pharyngitis (EBV, adenovirus)",
+      "Infectious mononucleosis",
+      "Peritonsillar abscess"
+    ]
+  },
+  "student_review": {
+    "name": "Alex Chen (Queen's Medicine Class of 2027)",
+    "decision": "AGREE",
+    "urgency": "URGENT",
+    "time_minutes": 8.5
+  },
+  "care_options": [
+    {
+      "facility": "Appletree Medical Group - Kingston",
+      "type": "URGENT_CARE",
+      "distance_km": 4.2,
+      "phone": "613-384-2524"
+    },
+    {
+      "facility": "Kingston After Hours Clinic",
+      "type": "URGENT_CARE",
+      "distance_km": 1.8,
+      "phone": "613-544-3310"
+    },
+    {
+      "facility": "Queen's Family Health Team",
+      "type": "GP",
+      "distance_km": 0.5,
+      "phone": "613-544-3400"
+    }
+  ]
+}

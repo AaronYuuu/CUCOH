@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Assessment - Meduroam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .urgency-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .urgency-ROUTINE {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .urgency-URGENT {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .urgency-EMERGENCY {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .confidence {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .confidence-bar {
+            flex: 1;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+        
+        .differential-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .differential-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        
+        .care-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+        
+        .care-option:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .care-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .care-option h3 {
+            color: #667eea;
+            font-size: 1.3em;
+        }
+        
+        .priority-score {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .care-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .care-detail {
+            display: flex;
+            align-items: center;
+            color: #666;
+        }
+        
+        .care-detail strong {
+            margin-right: 5px;
+        }
+        
+        .icon {
+            margin-right: 8px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+        }
+        
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Your Clinical Assessment</h1>
+            <p style="color: #666; margin-top: 10px;">
+                Reviewed by Medical Student (Queen's Medicine) with AI Support
+            </p>
+        </div>
+        
+        <div class="section">
+            <h2>📋 Clinical Summary</h2>
+            <div style="margin: 15px 0;">
+                <strong>Urgency Level:</strong> 
+                <span class="urgency-badge urgency-{{ results.student_review.urgency }}">
+                    {{ results.student_review.urgency }}
+                </span>
+            </div>
+            
+            <div class="confidence">
+                <strong>AI Confidence:</strong>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: {{ (results.ai_assessment.confidence * 100)|int }}%"></div>
+                </div>
+                <strong>{{ (results.ai_assessment.confidence * 100)|int }}%</strong>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <strong>Assessment:</strong>
+                <p style="margin-top: 10px; line-height: 1.6;">{{ results.ai_assessment.assessment }}</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <strong>Recommended Plan:</strong>
+                <p style="margin-top: 10px; line-height: 1.6;">{{ results.ai_assessment.plan }}</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔍 Differential Diagnoses Considered</h2>
+            <ul class="differential-list">
+                {% for diff in results.ai_assessment.differentials[:5] %}
+                <li>{{ diff }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>👨‍⚕️ Medical Student Review</h2>
+            <p><strong>Reviewer:</strong> {{ results.student_review.name }}</p>
+            <p style="margin-top: 10px;"><strong>Decision:</strong> {{ results.student_review.decision }}</p>
+            <p style="margin-top: 10px;"><strong>Clinical Reasoning:</strong></p>
+            <p style="margin-top: 5px; line-height: 1.6; color: #555;">{{ results.student_review.reasoning }}</p>
+        </div>
+        
+        <div class="section">
+            <h2>🏥 Recommended Care Options (Kingston Area)</h2>
+            <p style="margin-bottom: 20px; color: #666;">
+                Based on your symptoms and location near Queen's University, here are your best options:
+            </p>
+            
+            {% for option in results.care_options %}
+            <div class="care-option">
+                <div class="care-option-header">
+                    <h3>{{ option.facility }}</h3>
+                    <span class="priority-score">Score: {{ option.priority_score|int }}/100</span>
+                </div>
+                
+                <p style="color: #666; margin: 5px 0;">
+                    <span class="icon">📍</span>{{ option.address }}
+                </p>
+                
+                <div class="care-details">
+                    <div class="care-detail">
+                        <span class="icon">🏥</span>
+                        <strong>Type:</strong> {{ option.type }}
+                    </div>
+                    <div class="care-detail">
+                        <span class="icon">📏</span>
+                        <strong>Distance:</strong> {{ option.distance_km }} km
+                    </div>
+                    <div class="care-detail">
+                        <span class="icon">⏱️</span>
+                        <strong>Wait:</strong> {{ option.wait_time or 'Call ahead' }}
+                    </div>
+                    {% if option.phone %}
+                    <div class="care-detail">
+                        <span class="icon">📞</span>
+                        <strong>Phone:</strong> {{ option.phone }}
+                    </div>
+                    {% endif %}
+                    <div class="care-detail">
+                        <span class="icon">🚶</span>
+                        <strong>Walk-in:</strong> {{ 'Yes' if option.walk_in else 'Appointment needed' }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="disclaimer">
+            <strong>⚠️ IMPORTANT DISCLAIMER:</strong> This assessment is generated by AI and reviewed by a medical student. 
+            It is for informational purposes only and does not replace professional medical advice, diagnosis, or treatment. 
+            Always consult with a licensed healthcare provider before making any healthcare decisions.
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="/" class="btn">Start New Consultation</a>
+            <button onclick="window.print()" class="btn" style="margin-left: 10px; background: #6c757d;">
+                Print Results
+            </button>
+        </div>
+        
+        <div style="text-align: center; color: #999; font-size: 0.9em; padding: 20px;">
+            <p>Meduroam Clinical Decision Support Platform</p>
+            <p>Queen's University Faculty of Health Sciences, Kingston, ON</p>
+        </div>
+    </div>
+</body>
+</html>

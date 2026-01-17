@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meduroam - Clinical Decision Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .disclaimer strong {
+            color: #856404;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Meduroam</h1>
+            <div class="subtitle">Clinical Decision Support Platform</div>
+            <div class="subtitle">Queen's University, Kingston, ON</div>
+        </div>
+        
+        <div class="disclaimer">
+            <strong>⚠️ IMPORTANT DISCLAIMER:</strong> This is a Clinical Decision Support tool, not a diagnostic system. 
+            All outputs will be reviewed by medical students and physicians before any clinical action.
+        </div>
+        
+        <form id="consultForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Age *</label>
+                    <input type="number" id="age" name="age" required min="1" max="120" value="25">
+                </div>
+                
+                <div class="form-group">
+                    <label for="sex">Sex *</label>
+                    <select id="sex" name="sex" required>
+                        <option value="Male">Male</option>
+                        <option value="Female" selected>Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="has_gp">Do you have a family doctor?</label>
+                <select id="has_gp" name="has_gp">
+                    <option value="false" selected>No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="chief_complaint">What brings you here today? (Chief Complaint) *</label>
+                <input type="text" id="chief_complaint" name="chief_complaint" required 
+                       placeholder="e.g., Sore throat and fever">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Please describe your symptoms in detail *</label>
+                <textarea id="description" name="description" required 
+                          placeholder="Include: When did it start? How severe is it? What makes it better or worse? Any other symptoms?"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="duration">How long have you had these symptoms?</label>
+                    <input type="text" id="duration" name="duration" placeholder="e.g., 3 days">
+                </div>
+                
+                <div class="form-group">
+                    <label for="severity">Severity (1-10)</label>
+                    <input type="number" id="severity" name="severity" min="1" max="10" placeholder="5">
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Get Clinical Assessment</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Analyzing your symptoms...</div>
+            <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                AI generating SOAP note → Medical student review → Care routing
+            </div>
+        </div>
+        
+        <div class="footer">
+            Human-in-the-Loop Clinical Decision Support<br>
+            Powered by Gemini AI with Medical Student Oversight
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('consultForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                age: formData.get('age'),
+                sex: formData.get('sex'),
+                has_gp: formData.get('has_gp') === 'true',
+                chief_complaint: formData.get('chief_complaint'),
+                description: formData.get('description'),
+                duration: formData.get('duration') || 'Not specified',
+                severity: formData.get('severity') ? `${formData.get('severity')}/10` : 'Not specified',
+                associated_symptoms: [],
+                medical_history: [],
+                medications: [],
+                allergies: []
+            };
+            
+            // Hide form and show loading
+            document.getElementById('consultForm').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
+            
+            try {
+                // Start consultation
+                const startResponse = await fetch('/start-consult', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!startResponse.ok) throw new Error('Failed to start consultation');
+                
+                // Submit symptoms
+                const symptomsResponse = await fetch('/submit-symptoms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!symptomsResponse.ok) throw new Error('Failed to process symptoms');
+                
+                const result = await symptomsResponse.json();
+                
+                if (result.success) {
+                    window.location.href = '/results';
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                    document.getElementById('consultForm').style.display = 'block';
+                    document.getElementById('loading').classList.remove('active');
+                    document.getElementById('submitBtn').disabled = false;
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                document.getElementById('consultForm').style.display = 'block';
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

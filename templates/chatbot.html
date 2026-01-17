@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meduroam - AI Clinical Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.4s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.bot {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+        
+        .bot .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .user .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .bot .avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 12px 18px;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .typing-indicator.active {
+            display: block;
+        }
+        
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .input-area {
+            padding: 20px 25px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .input-wrapper {
+            display: none;
+        }
+        
+        .input-wrapper.active {
+            display: block;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        input, select, textarea {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            border-radius: 15px;
+            resize: none;
+            min-height: 60px;
+            font-family: inherit;
+        }
+        
+        .btn-send {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            white-space: nowrap;
+        }
+        
+        .btn-send:hover {
+            background: #5568d3;
+        }
+        
+        .btn-send:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .quick-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .quick-option {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .quick-option:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+        
+        .disclaimer strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Meduroam AI</h1>
+            <div class="subtitle">Clinical Decision Support Assistant</div>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="disclaimer">
+                <strong>⚠️ Important:</strong> This is an AI-assisted clinical consultation tool. For emergencies, call 911 immediately.
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <!-- Welcome State -->
+            <div class="input-wrapper active" id="welcomeInput">
+                <button class="btn-send" onclick="startConsult()" style="width: 100%;">
+                    Start Consultation
+                </button>
+            </div>
+            
+            <!-- Age Input -->
+            <div class="input-wrapper" id="ageInput">
+                <div class="input-row">
+                    <input type="number" id="age" placeholder="Enter your age..." min="1" max="120">
+                    <button class="btn-send" onclick="submitAge()">Send</button>
+                </div>
+            </div>
+            
+            <!-- Sex Input -->
+            <div class="input-wrapper" id="sexInput">
+                <div class="input-row">
+                    <select id="sex">
+                        <option value="">Select...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button class="btn-send" onclick="submitSex()">Send</button>
+                </div>
+            </div>
+            
+            <!-- GP Input -->
+            <div class="input-wrapper" id="gpInput">
+                <div class="input-row">
+                    <select id="has_gp">
+                        <option value="">Select...</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                    <button class="btn-send" onclick="submitGP()">Send</button>
+                </div>
+            </div>
+            
+            <!-- Chief Complaint -->
+            <div class="input-wrapper" id="complaintInput">
+                <div class="input-row">
+                    <input type="text" id="chief_complaint" placeholder="e.g., chest pain, headache, fever...">
+                    <button class="btn-send" onclick="submitComplaint()">Send</button>
+                </div>
+                <div class="quick-options">
+                    <div class="quick-option" onclick="useQuickOption('chest pain')">Chest pain</div>
+                    <div class="quick-option" onclick="useQuickOption('headache')">Headache</div>
+                    <div class="quick-option" onclick="useQuickOption('fever')">Fever</div>
+                    <div class="quick-option" onclick="useQuickOption('shortness of breath')">Shortness of breath</div>
+                </div>
+            </div>
+            
+            <!-- Detailed Symptoms -->
+            <div class="input-wrapper" id="symptomsInput">
+                <textarea id="symptoms" placeholder="Tell me more about your symptoms..."></textarea>
+                <div class="input-row" style="margin-top: 10px;">
+                    <button class="btn-send" onclick="submitSymptoms()" style="width: 100%;">Send</button>
+                </div>
+            </div>
+            
+            <!-- Duration -->
+            <div class="input-wrapper" id="durationInput">
+                <div class="input-row">
+                    <input type="text" id="duration" placeholder="e.g., 2 hours, 3 days, 1 week...">
+                    <button class="btn-send" onclick="submitDuration()">Send</button>
+                </div>
+                <div class="quick-options">
+                    <div class="quick-option" onclick="useQuickOption('1 hour', 'duration')">1 hour</div>
+                    <div class="quick-option" onclick="useQuickOption('few hours', 'duration')">Few hours</div>
+                    <div class="quick-option" onclick="useQuickOption('1 day', 'duration')">1 day</div>
+                    <div class="quick-option" onclick="useQuickOption('several days', 'duration')">Several days</div>
+                    <div class="quick-option" onclick="useQuickOption('1 week', 'duration')">1 week</div>
+                </div>
+            </div>
+            
+            <!-- Severity -->
+            <div class="input-wrapper" id="severityInput">
+                <div class="quick-options" style="margin-bottom: 10px;">
+                    <div class="quick-option" onclick="submitSeverity('Mild - Manageable, not interfering with daily activities')">😊 Mild</div>
+                    <div class="quick-option" onclick="submitSeverity('Moderate - Noticeable discomfort, some impact on activities')">😐 Moderate</div>
+                    <div class="quick-option" onclick="submitSeverity('Severe - Significant pain/discomfort, difficult to function')">😣 Severe</div>
+                    <div class="quick-option" onclick="submitSeverity('Very Severe - Unbearable, requires immediate attention')">😰 Very Severe</div>
+                </div>
+            </div>
+            
+            <!-- Additional Details -->
+            <div class="input-wrapper" id="additionalInput">
+                <textarea id="additional" placeholder="Anything else you'd like to mention? (medications, allergies, medical history...)"></textarea>
+                <div class="input-row" style="margin-top: 10px;">
+                    <button class="btn-send" onclick="submitAdditional()" style="width: 100%;">Finish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let consultData = {
+            consult_id: null
+        };
+        
+        let currentStep = 'welcome';
+        
+        function addBotMessage(text) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            messageDiv.innerHTML = `
+                <div class="avatar">AI</div>
+                <div class="message-content">${text}</div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function addUserMessage(text) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div class="message-content">${text}</div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function showTyping() {
+            const chatContainer = document.getElementById('chatContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="avatar">AI</div>
+                <div class="typing-indicator active">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+        
+        function switchInput(inputId) {
+            document.querySelectorAll('.input-wrapper').forEach(w => w.classList.remove('active'));
+            document.getElementById(inputId).classList.add('active');
+        }
+        
+        async function startConsult() {
+            addUserMessage('Start Consultation');
+            switchInput('none');
+            
+            showTyping();
+            
+            try {
+                const response = await fetch('/start-consult', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                consultData.consult_id = data.consult_id;
+                
+                hideTyping();
+                addBotMessage("Hello! I'm your AI clinical assistant. I'll ask you a few questions to better understand your situation.");
+                
+                setTimeout(() => {
+                    addBotMessage("Let's start with some basic information. How old are you?");
+                    switchInput('ageInput');
+                    document.getElementById('age').focus();
+                }, 800);
+            } catch (error) {
+                hideTyping();
+                addBotMessage("Sorry, there was an error starting the consultation. Please try again.");
+            }
+        }
+        
+        function submitAge() {
+            const age = document.getElementById('age').value;
+            if (!age || age < 1 || age > 120) {
+                alert('Please enter a valid age.');
+                return;
+            }
+            
+            consultData.age = age;
+            addUserMessage(age + ' years old');
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage("Thank you. What is your biological sex?");
+                switchInput('sexInput');
+                document.getElementById('sex').focus();
+            }, 500);
+        }
+        
+        function submitSex() {
+            const sex = document.getElementById('sex').value;
+            if (!sex) {
+                alert('Please select your sex.');
+                return;
+            }
+            
+            consultData.sex = sex;
+            addUserMessage(sex);
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage("Do you currently have a family doctor or regular GP?");
+                switchInput('gpInput');
+                document.getElementById('has_gp').focus();
+            }, 500);
+        }
+        
+        function submitGP() {
+            const hasGP = document.getElementById('has_gp').value;
+            if (!hasGP) {
+                alert('Please select an option.');
+                return;
+            }
+            
+            consultData.has_gp = hasGP;
+            addUserMessage(hasGP === 'yes' ? 'Yes, I have a GP' : 'No, I don\'t have a GP');
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage("Now, let's discuss why you're here today. What is your main concern or chief complaint?");
+                switchInput('complaintInput');
+                document.getElementById('chief_complaint').focus();
+            }, 500);
+        }
+        
+        function useQuickOption(text, field = 'chief_complaint') {
+            document.getElementById(field).value = text;
+        }
+        
+        function submitComplaint() {
+            const complaint = document.getElementById('chief_complaint').value;
+            if (!complaint.trim()) {
+                alert('Please describe your main concern.');
+                return;
+            }
+            
+            consultData.chief_complaint = complaint;
+            addUserMessage(complaint);
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage(`I understand you're experiencing ${complaint}. Can you describe your symptoms in more detail? What does it feel like? Where exactly is it? Does anything make it better or worse?`);
+                switchInput('symptomsInput');
+                document.getElementById('symptoms').focus();
+            }, 500);
+        }
+        
+        function submitSymptoms() {
+            const symptoms = document.getElementById('symptoms').value;
+            if (!symptoms.trim()) {
+                alert('Please describe your symptoms.');
+                return;
+            }
+            
+            consultData.symptoms = symptoms;
+            addUserMessage(symptoms);
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage("How long have you been experiencing these symptoms?");
+                switchInput('durationInput');
+                document.getElementById('duration').focus();
+            }, 500);
+        }
+        
+        function submitDuration() {
+            const duration = document.getElementById('duration').value;
+            if (!duration.trim()) {
+                alert('Please specify the duration.');
+                return;
+            }
+            
+            consultData.duration = duration;
+            addUserMessage(duration);
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage("On a scale from mild to very severe, how would you rate the severity of your symptoms?");
+                switchInput('severityInput');
+            }, 500);
+        }
+        
+        function submitSeverity(severity) {
+            consultData.severity = severity;
+            addUserMessage(severity);
+            switchInput('none');
+            
+            setTimeout(() => {
+                addBotMessage("Almost done! Is there anything else you'd like to mention? For example: current medications, allergies, relevant medical history, or other symptoms?");
+                switchInput('additionalInput');
+                document.getElementById('additional').focus();
+            }, 500);
+        }
+        
+        async function submitAdditional() {
+            const additional = document.getElementById('additional').value;
+            consultData.additional = additional || 'None';
+            
+            addUserMessage(additional || 'Nothing else to add');
+            switchInput('none');
+            
+            showTyping();
+            addBotMessage("Thank you for providing all this information. I'm now analyzing your symptoms and generating a clinical assessment. This may take a moment...");
+            
+            try {
+                const response = await fetch('/submit-symptoms', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        consult_id: consultData.consult_id,
+                        age: consultData.age,
+                        sex: consultData.sex,
+                        has_gp: consultData.has_gp,
+                        chief_complaint: consultData.chief_complaint,
+                        symptoms: consultData.symptoms,
+                        duration: consultData.duration,
+                        severity: consultData.severity,
+                        additional_info: consultData.additional
+                    })
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/results';
+                } else {
+                    hideTyping();
+                    addBotMessage("I apologize, but there was an error processing your consultation. Please try again or seek in-person care if urgent.");
+                }
+            } catch (error) {
+                hideTyping();
+                addBotMessage("Sorry, there was a network error. Please check your connection and try again.");
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const activeInput = document.querySelector('.input-wrapper.active');
+                if (activeInput) {
+                    const button = activeInput.querySelector('.btn-send');
+                    if (button && !button.disabled) {
+                        e.preventDefault();
+                        button.click();
+                    }
+                }
+            }
+        });
+        
+        // Initial welcome message
+        window.onload = function() {
+            addBotMessage("Welcome to Meduroam! I'm here to help assess your symptoms and guide you to appropriate care. Click 'Start Consultation' when you're ready.");
+        };
+    </script>
+</body>
+</html>
